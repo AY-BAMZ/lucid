@@ -145,6 +145,8 @@ const TagsInput = ({ availableTags }: any) => {
       // Move cursor to the next block
       const newBlocks = [...blocks];
       setActiveBlockIndex(activeBlockIndex + 1);
+    } else if (e.key === "ArrowLeft" && activeBlockIndex === null) {
+      setActiveBlockIndex(blocks.length - 2);
     }
   };
 
@@ -336,15 +338,17 @@ const TagsInput = ({ availableTags }: any) => {
       <div className="flex border flex-wrap p-2 gap-y-2 items-center  w-full border-blue-500">
         <p className="mr-1 font-bold text-[20px]">=</p>
         {renderBlocks()}
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setShowDropdown(true)}
-          placeholder={blocks?.length === 0 ? "Type here..." : ""}
-        />
+        {activeBlockIndex === null && (
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setShowDropdown(true)}
+            placeholder={blocks?.length === 0 ? "Type here..." : ""}
+          />
+        )}
       </div>
       {showDropdown && (
         <div className="dropdown">
