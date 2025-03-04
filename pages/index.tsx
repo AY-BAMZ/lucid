@@ -4,7 +4,7 @@ import { getAutoComplete } from "./api/getAutoComplete";
 import { useMemo } from "react";
 
 export default function Home() {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["getAutoComplete"],
     queryFn: getAutoComplete,
   });
@@ -50,9 +50,20 @@ export default function Home() {
 
   return (
     <div className={``}>
-      <main className="flex flex-col p-6 gap-4">
-        <h1 className="text-[24px] font-semibold ">Add New Variable</h1>
-        <TagsInput availableTags={tags} />
+      <main className="flex flex-col p-6 gap-4 items-center">
+        <h1 className="text-[20px] font-medium text-gray-500 ">
+          Ayobami Paul's Submission
+        </h1>
+        <hr />
+        {isLoading && (
+          <h1 className="text-[20px] font-semibold ">Loading ...</h1>
+        )}
+        {data && (
+          <>
+            <h1 className="text-[24px] font-bold ">Add New Variable</h1>
+            <TagsInput availableTags={tags} />
+          </>
+        )}
       </main>
     </div>
   );
