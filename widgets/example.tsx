@@ -74,7 +74,7 @@ const TagsInput = ({ availableTags }: any) => {
       if (showDropdown && filteredTags.length > 0) {
         addBlock(filteredTags[0]);
       }
-    } else if (["+", "-", "*", "/"].includes(e.key)) {
+    } else if (["+", "-", "*", "/", "^", "(", ")"].includes(e.key)) {
       const numberValue = inputValue.replace(/[^0-9]/g, "");
 
       const updateState = async () => {
@@ -263,57 +263,94 @@ const TagsInput = ({ availableTags }: any) => {
     });
   };
   const calculateResult = () => {
-    let result = 0;
-    let currentNumber = "";
-    let lastOperator: any = "+";
+    // Helper function to evaluate a list of blocks
+    const evaluateBlocks = (blocks: Block[]) => {
+      let result = 0;
+      let currentNumber = "";
+      let lastOperator: any = "+";
 
-    blocks.forEach((block, index) => {
-      if (block.type === "number") {
-        currentNumber += block.value;
-      } else if (block.type === "symbol") {
-        if (currentNumber) {
-          const num = parseFloat(currentNumber);
-          if (lastOperator === "+") {
-            result += num;
-          } else if (lastOperator === "-") {
-            result -= num;
-          } else if (lastOperator === "*") {
-            result *= num;
-          } else if (lastOperator === "/") {
-            result /= num;
+      blocks.forEach((block, index) => {
+        if (block.type === "number") {
+          currentNumber += block.value;
+        } else if (block.type === "symbol") {
+          if (currentNumber) {
+            const num = parseFloat(currentNumber);
+            if (lastOperator === "+") {
+              result += num;
+            } else if (lastOperator === "-") {
+              result -= num;
+            } else if (lastOperator === "*") {
+              result *= num;
+            } else if (lastOperator === "/") {
+              result /= num;
+            } else if (lastOperator === "^") {
+              result = Math.pow(result, num);
+            }
+            currentNumber = "";
           }
-          currentNumber = "";
+          lastOperator = block.value;
+        } else if (block.type === "tag") {
+          currentNumber += block.value || "0";
         }
-        lastOperator = block.value;
-      } else if (block.type === "tag") {
-        currentNumber += block.value || "0";
-      }
 
-      if (
-        index < blocks.length - 1 &&
-        (block.type === "number" || block.type === "tag")
-      ) {
-        const nextBlock = blocks[index + 1];
-        if (nextBlock.type === "number" || nextBlock.type === "tag") {
-          lastOperator = "*";
+        // Handle implicit multiplication
+        if (
+          index < blocks.length - 1 &&
+          (block.type === "number" || block.type === "tag")
+        ) {
+          const nextBlock = blocks[index + 1];
+          if (nextBlock.type === "number" || nextBlock.type === "tag") {
+            lastOperator = "*";
+          }
+        }
+      });
+
+      // Handle the last number in the sequence
+      if (currentNumber) {
+        const num = parseFloat(currentNumber);
+        if (lastOperator === "+") {
+          result += num;
+        } else if (lastOperator === "-") {
+          result -= num;
+        } else if (lastOperator === "*") {
+          result *= num;
+        } else if (lastOperator === "/") {
+          result /= num;
+        } else if (lastOperator === "^") {
+          result = Math.pow(result, num);
         }
       }
-    });
 
-    if (currentNumber) {
-      const num = parseFloat(currentNumber);
-      if (lastOperator === "+") {
-        result += num;
-      } else if (lastOperator === "-") {
-        result -= num;
-      } else if (lastOperator === "*") {
-        result *= num;
-      } else if (lastOperator === "/") {
-        result /= num;
-      }
-    }
+      return result;
+    };
 
-    return result;
+    // Helper function to handle parentheses
+    const evaluateParentheses = (blocks: Block[]) => {
+      const stack: Block[][] = [];
+      let currentBlocks: Block[] = [];
+
+      blocks.forEach((block) => {
+        if (block.type === "symbol" && block.value === "(") {
+          // Start a new group
+          stack.push(currentBlocks);
+          currentBlocks = [];
+        } else if (block.type === "symbol" && block.value === ")") {
+          // Evaluate the current group and merge with the previous group
+          const groupResult = evaluateBlocks(currentBlocks);
+          currentBlocks = stack.pop() || [];
+          currentBlocks.push({ type: "number", value: groupResult.toString() });
+        } else {
+          // Add the block to the current group
+          currentBlocks.push(block);
+        }
+      });
+
+      // Evaluate the remaining blocks
+      return evaluateBlocks(currentBlocks);
+    };
+
+    // Evaluate the entire expression, starting with parentheses
+    return evaluateParentheses(blocks);
   };
   return (
     <div className="tags-input-container w-full">
