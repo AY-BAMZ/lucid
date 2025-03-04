@@ -8,7 +8,7 @@ interface Block {
 }
 
 const TagsInput = ({ availableTags }: any) => {
-  const [blocks, setBlocks] = useState<Block[]>([]); // Stores all blocks (tags, numbers, symbols)
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const {
     // blocks,
     inputValue,
@@ -39,14 +39,12 @@ const TagsInput = ({ availableTags }: any) => {
   const [showDropDown2, setShowDropDown2] = useState(false);
   const [dropdown2, setDropdown2] = useState("This month");
 
-  const inputRef = useRef<HTMLInputElement>(null); // Reference to the input element
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Handle input changes
   const handleInputChange = (e: any) => {
     const value = e.target.value;
     setInputValue(value);
 
-    // Show dropdown if typing a string
     if (/[a-zA-Z]/.test(value)) {
       setShowDropdown(true);
       setFilteredTags(
@@ -59,10 +57,8 @@ const TagsInput = ({ availableTags }: any) => {
     }
   };
 
-  // Handle keydown events (e.g., backspace, enter, arrow keys)
   const handleKeyDown = (e: any) => {
     if (e.key === "Backspace" && inputValue === "" && blocks.length > 0) {
-      // Remove the last block if backspace is pressed and input is empty
       const newBlocks = [...blocks];
       newBlocks.splice(
         activeBlockIndex !== null ? activeBlockIndex : blocks.length - 1,
@@ -71,18 +67,15 @@ const TagsInput = ({ availableTags }: any) => {
       setBlocks(newBlocks);
       setActiveBlockIndex(null);
     } else if (e.key === "Enter") {
-      // Add number block if there's a number input
       if (inputValue && /^\d+$/.test(inputValue)) {
         addBlock({ type: "number", value: inputValue });
         setInputValue("");
       }
-      // Add the first filtered tag when pressing enter (if dropdown is visible)
       if (showDropdown && filteredTags.length > 0) {
         addBlock(filteredTags[0]);
       }
     } else if (["+", "-", "*", "/"].includes(e.key)) {
-      // Split input into number and symbol blocks
-      const numberValue = inputValue.replace(/[^0-9]/g, ""); // Extract numbers
+      const numberValue = inputValue.replace(/[^0-9]/g, "");
 
       const updateState = async () => {
         if (numberValue) {
@@ -129,20 +122,18 @@ const TagsInput = ({ availableTags }: any) => {
       };
 
       updateState();
-      e.preventDefault(); // Prevent default behavior
+      e.preventDefault();
     } else if (
       e.key === "ArrowLeft" &&
       activeBlockIndex !== null &&
       activeBlockIndex > 0
     ) {
-      // Move cursor to the previous block
       setActiveBlockIndex(activeBlockIndex - 1);
     } else if (
       e.key === "ArrowRight" &&
       activeBlockIndex !== null &&
       activeBlockIndex < blocks.length - 1
     ) {
-      // Move cursor to the next block
       const newBlocks = [...blocks];
       setActiveBlockIndex(activeBlockIndex + 1);
     } else if (e.key === "ArrowLeft" && activeBlockIndex === null) {
@@ -150,16 +141,13 @@ const TagsInput = ({ availableTags }: any) => {
     }
   };
 
-  // Add a new block (tag, number, or symbol)
   const addBlock = (block: any) => {
     let newBlocks = [...blocks];
     console.log("newBlocks1", newBlocks);
     if (activeBlockIndex !== null) {
-      // Insert the new block at the active block index
       newBlocks.splice(activeBlockIndex + 1, 0, block);
     } else {
       console.log("block", block);
-      // Add the new block to the end
       newBlocks.push(block);
     }
     console.log("newBlocks", newBlocks);
@@ -169,7 +157,6 @@ const TagsInput = ({ availableTags }: any) => {
     setActiveBlockIndex(null);
   };
 
-  // Handle tag selection from dropdown
   const handleTagSelect = (tag: any) => {
     addBlock({ type: "tag", ...tag });
   };
@@ -182,7 +169,7 @@ const TagsInput = ({ availableTags }: any) => {
     "4 months",
   ]);
   console.log("blocks", blocks);
-  // Render blocks
+
   const renderBlocks = () => {
     return blocks.map((block, index) => {
       if (block.type === "tag") {
@@ -196,7 +183,6 @@ const TagsInput = ({ availableTags }: any) => {
               className={`border border-blue-400 flex items-center px-4 rounded-full bg-blue-50 py-2 ${
                 activeBlockIndex === index ? "active" : ""
               }`}
-              //   onClick={() => setActiveBlockIndex(index)}
             >
               <p className="flex whitespace-nowrap text-blue-800 capitalize">
                 #{block.name}
@@ -279,7 +265,7 @@ const TagsInput = ({ availableTags }: any) => {
   const calculateResult = () => {
     let result = 0;
     let currentNumber = "";
-    let lastOperator: any = "+"; // Initialize with '+' to handle the first number correctly
+    let lastOperator: any = "+";
 
     blocks.forEach((block, index) => {
       if (block.type === "number") {
@@ -300,12 +286,9 @@ const TagsInput = ({ availableTags }: any) => {
         }
         lastOperator = block.value;
       } else if (block.type === "tag") {
-        // Handle tags if necessary, e.g., by adding their value to currentNumber
-        // Assuming tag.value is a number or can be converted to one
         currentNumber += block.value || "0";
       }
 
-      // Handle implicit multiplication if the next block is a number or tag
       if (
         index < blocks.length - 1 &&
         (block.type === "number" || block.type === "tag")
@@ -317,7 +300,6 @@ const TagsInput = ({ availableTags }: any) => {
       }
     });
 
-    // Handle the last number in the sequence
     if (currentNumber) {
       const num = parseFloat(currentNumber);
       if (lastOperator === "+") {
@@ -351,7 +333,7 @@ const TagsInput = ({ availableTags }: any) => {
         )}
       </div>
       {showDropdown && (
-        <div className="dropdown">
+        <div className="dropdown max-h-[300px] overflow-y-scroll">
           {filteredTags.map((tag: any) => (
             <div
               key={tag.id}
