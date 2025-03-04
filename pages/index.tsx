@@ -52,7 +52,7 @@ export default function Home() {
     <div className={``}>
       <main className="flex flex-col p-6 gap-4 items-center">
         <h1 className="text-[20px] font-medium text-gray-500 ">
-          Ayobami Paul's Submission
+          Ayobami Paul Adegbohungbe Submission
         </h1>
         <hr />
         {isLoading && (
