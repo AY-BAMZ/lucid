@@ -98,6 +98,7 @@ const TagsInput = ({ availableTags }: any) => {
                   type: "symbol",
                   value: e.key,
                 });
+                setActiveBlockIndex(activeBlockIndex + 2);
               } else {
                 newBlocks.push({ type: "number", value: numberValue });
                 newBlocks.push({ type: "symbol", value: e.key });
@@ -115,6 +116,7 @@ const TagsInput = ({ availableTags }: any) => {
                   type: "symbol",
                   value: e.key,
                 });
+                setActiveBlockIndex(activeBlockIndex + 1);
               } else {
                 newBlocks.push({ type: "symbol", value: e.key });
               }
@@ -362,7 +364,9 @@ const TagsInput = ({ availableTags }: any) => {
         </div>
       )}
       <span>
-        <p>Result: {calculateResult()}</p>
+        <p className="text-[16px] font-semibold mt-4">
+          Result: {calculateResult()}
+        </p>
       </span>
     </div>
   );

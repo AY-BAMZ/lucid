@@ -50,7 +50,8 @@ export default function Home() {
 
   return (
     <div className={``}>
-      <main className="flex flex-col p-6">
+      <main className="flex flex-col p-6 gap-4">
+        <h1 className="text-[24px] font-semibold ">Add New Variable</h1>
         <TagsInput availableTags={tags} />
       </main>
     </div>
